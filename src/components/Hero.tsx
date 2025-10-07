@@ -43,8 +43,15 @@ export const Hero = () => {
     link.click();
   };
 
+  const downloadApp = () => {
+    const link = document.createElement("a");
+    link.href = "/assets/application-f5c02e22-2deb-45d1-894f-065a2303dcab.apk";
+    link.download = "AbinasKeshariSingh.apk";
+    link.click();
+  };
+
   return (
-    <section 
+    <section
       className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-background to-surface-dark"
     >
       {/* 🔹 Background with parallax */}
@@ -261,6 +268,20 @@ export const Hero = () => {
             onClick={downloadCV}
           >
             Download CV
+            <Download className="ml-2 h-5 w-5" />
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            className="border-border bg-card/50 backdrop-blur-sm hover:bg-card/70 px-8 py-4 text-lg"
+            onClick={() => {
+              const link = document.createElement("a");
+              link.href = "/assets/application-f5c02e22-2deb-45d1-894f-065a2303dcab.apk";
+              link.download = "AbinasKeshariSingh.apk";
+              link.click();
+            }}
+          >
+            Download App
             <Download className="ml-2 h-5 w-5" />
           </Button>
         </div>
