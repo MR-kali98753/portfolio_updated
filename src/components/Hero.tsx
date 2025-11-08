@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { useTypingEffect } from "@/hooks/useTypingEffect";
 import { useState, useEffect } from "react";
 import { motion, useTransform, useScroll } from "framer-motion";
+import { VideoBackground } from "@/components/VideoBackground";
+import { ParticleField, AnimatedText, MagneticButton } from "@/components/AnimeStyleEffects";
+import heroVideo from "@/assets/hero-video.mp4";
 
 export const Hero = () => {
   const roles = [
@@ -54,6 +57,16 @@ export const Hero = () => {
     <section
       className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-background to-surface-dark"
     >
+      {/* Video Background at z-2 */}
+      <VideoBackground
+        videoSrc={heroVideo}
+        overlay={true}
+        overlayOpacity={0.5}
+      />
+
+      {/* AnimeJS Style Particle Field */}
+      <ParticleField count={40} speed={0.5} interactive={true} />
+
       {/* 🔹 Background with parallax */}
       <motion.div 
         className="absolute inset-0"
@@ -62,6 +75,7 @@ export const Hero = () => {
           transformStyle: "preserve-3d",
           transition: "transform 0.1s ease-out",
           y: yBg,
+          zIndex: 3,
         }}
       >
         {/* Deep Background Layer */}
@@ -228,11 +242,19 @@ export const Hero = () => {
       {/* 🔹 Foreground content */}
       <motion.div 
         className="relative z-10 text-center max-w-4xl mx-auto px-6 pt-16"
-        style={{ y: yFg }}
+        style={{ y: yFg, zIndex: 10 }}
       >
         <h1 className="text-6xl md:text-8xl font-bold mb-6">
-          <span className="block text-text-primary">Hey, I'm</span>
-          <span className="block gradient-text">Abinas Keshari Singh</span>
+          <AnimatedText
+            text="Hey, I'm"
+            className="block text-text-primary"
+            delay={0.2}
+          />
+          <AnimatedText
+            text="Abinas Keshari Singh"
+            className="block gradient-text"
+            delay={0.5}
+          />
         </h1>
 
         <div className="text-2xl md:text-4xl font-medium text-text-secondary mb-8 h-12">
@@ -252,38 +274,45 @@ export const Hero = () => {
         </div>
 
         <div className="flex flex-wrap gap-4 justify-center mb-12">
-          <Button 
-            size="lg" 
-            className="bg-gradient-primary hover:opacity-90 text-primary-foreground border-0 px-8 py-4 text-lg font-medium hover-glow"
-            onClick={() => scrollToSection("projects")}
-          >
-            View My Work
-            <ArrowDown className="ml-2 h-5 w-5" />
-          </Button>
+          <MagneticButton strength={20}>
+            <Button 
+              size="lg" 
+              className="bg-gradient-primary hover:opacity-90 text-primary-foreground border-0 px-8 py-4 text-lg font-medium hover-glow"
+              onClick={() => scrollToSection("projects")}
+            >
+              View My Work
+              <ArrowDown className="ml-2 h-5 w-5" />
+            </Button>
+          </MagneticButton>
           
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="border-border bg-card/50 backdrop-blur-sm hover:bg-card/70 px-8 py-4 text-lg"
-            onClick={downloadCV}
-          >
-            Download CV
-            <Download className="ml-2 h-5 w-5" />
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="border-border bg-card/50 backdrop-blur-sm hover:bg-card/70 px-8 py-4 text-lg"
-            onClick={() => {
-              const link = document.createElement("a");
-              link.href = "/assets/application-f5c02e22-2deb-45d1-894f-065a2303dcab.apk";
-              link.download = "AbinasKeshariSingh.apk";
-              link.click();
-            }}
-          >
-            Download App
-            <Download className="ml-2 h-5 w-5" />
-          </Button>
+          <MagneticButton strength={20}>
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="border-border bg-card/50 backdrop-blur-sm hover:bg-card/70 px-8 py-4 text-lg"
+              onClick={downloadCV}
+            >
+              Download CV
+              <Download className="ml-2 h-5 w-5" />
+            </Button>
+          </MagneticButton>
+          
+          <MagneticButton strength={20}>
+            <Button
+              variant="outline"
+              size="lg"
+              className="border-border bg-card/50 backdrop-blur-sm hover:bg-card/70 px-8 py-4 text-lg"
+              onClick={() => {
+                const link = document.createElement("a");
+                link.href = "/assets/application-f5c02e22-2deb-45d1-894f-065a2303dcab.apk";
+                link.download = "AbinasKeshariSingh.apk";
+                link.click();
+              }}
+            >
+              Download App
+              <Download className="ml-2 h-5 w-5" />
+            </Button>
+          </MagneticButton>
         </div>
 
         <div className="flex gap-6 justify-center">
@@ -301,7 +330,7 @@ export const Hero = () => {
 
       {/* 🔹 Scroll Indicator */}
       <motion.div 
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 cursor-pointer hover:text-primary transition-colors"
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 cursor-pointer hover:text-primary transition-colors z-10"
         onClick={() => scrollToSection("about")}
         animate={{ y: [0, -10, 0] }}
         transition={{ repeat: Infinity, duration: 2 }}

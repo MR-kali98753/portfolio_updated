@@ -6,6 +6,9 @@ import { useState, useEffect } from "react";
 import { ProjectFilter } from "./ProjectFilter";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useToast } from "@/hooks/use-toast";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { ScrollReveal, MagneticElement } from "@/components/MotionGraphics";
+import { ParallaxWrapper } from "@/components/ParallaxWrapper";
 
 export const Projects = () => {
   const { toast } = useToast();
@@ -77,12 +80,19 @@ export const Projects = () => {
     });
   };
 
+  const { scrollYProgress } = useScroll();
+  const backgroundY = useTransform(scrollYProgress, [0, 1], [0, -150]);
+  const backgroundOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.2, 0.4, 0.2]);
+
   return (
     <section id="projects" className="py-20 px-6 bg-surface/50 relative overflow-hidden">
-      {/* Dynamic Background */}
-      <div className="absolute inset-0 opacity-20">
+      {/* Enhanced Dynamic Background with Parallax */}
+      <motion.div 
+        className="absolute inset-0 opacity-20"
+        style={{ y: backgroundY, opacity: backgroundOpacity }}
+      >
         {/* Animated mesh gradient */}
-        <div 
+        <motion.div 
           className="absolute inset-0"
           style={{
             background: `
@@ -90,16 +100,23 @@ export const Projects = () => {
               linear-gradient(-45deg, hsl(var(--accent) / 0.05) 0%, transparent 50%),
               radial-gradient(circle at ${50 + mousePosition.x * 20}% ${50 + mousePosition.y * 20}%, hsl(var(--secondary) / 0.1), transparent 60%)
             `,
-            transition: 'background 0.5s ease'
+          }}
+          animate={{
+            backgroundPosition: ["0% 0%", "100% 100%"],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear",
           }}
         />
         
-        {/* Floating geometric shapes */}
+        {/* Enhanced Floating geometric shapes with motion */}
         <div className="absolute inset-0">
-          {Array.from({ length: 15 }).map((_, i) => (
-            <div
+          {Array.from({ length: 20 }).map((_, i) => (
+            <motion.div
               key={i}
-              className="absolute opacity-30 animate-float"
+              className="absolute opacity-30"
               style={{
                 width: `${10 + Math.random() * 20}px`,
                 height: `${10 + Math.random() * 20}px`,
@@ -107,26 +124,43 @@ export const Projects = () => {
                 top: `${Math.random() * 100}%`,
                 background: `linear-gradient(45deg, hsl(var(--primary)), hsl(var(--accent)))`,
                 borderRadius: Math.random() > 0.5 ? '50%' : '0%',
-                animationDelay: `${Math.random() * 5}s`,
-                animationDuration: `${4 + Math.random() * 6}s`,
-                transform: `rotate(${Math.random() * 360}deg)`
+              }}
+              animate={{
+                y: [0, -40, 0],
+                x: [0, Math.cos(i) * 30, 0],
+                rotate: [0, 360],
+                scale: [1, 1.3, 1],
+              }}
+              transition={{
+                duration: 4 + Math.random() * 4,
+                delay: Math.random() * 2,
+                repeat: Infinity,
+                ease: "easeInOut",
               }}
             />
           ))}
         </div>
-      </div>
+      </motion.div>
       
-      <div className="max-w-7xl mx-auto relative z-10" ref={projectsRef}>
-        <div className={`text-center mb-16 transition-all duration-1000 ${
-          projectsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-        }`}>
-          <h2 className="text-4xl md:text-6xl font-bold text-text-primary mb-6">
-            Featured <span className="gradient-text">Projects</span>
-          </h2>
-          <p className="text-xl text-text-secondary max-w-3xl mx-auto">
-            A showcase of my recent work and personal projects
-          </p>
-        </div>
+      <ParallaxWrapper speed={0.3} direction="up">
+        <div className="max-w-7xl mx-auto relative z-10" ref={projectsRef}>
+          <ScrollReveal direction="up" delay={0.1}>
+            <motion.div 
+              className={`text-center mb-16 transition-all duration-1000 ${
+                projectsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+              }`}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={projectsVisible ? { scale: 1, opacity: 1 } : { scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <h2 className="text-4xl md:text-6xl font-bold text-text-primary mb-6">
+                Featured <span className="gradient-text">Projects</span>
+              </h2>
+              <p className="text-xl text-text-secondary max-w-3xl mx-auto">
+                A showcase of my recent work and personal projects
+              </p>
+            </motion.div>
+          </ScrollReveal>
 
         <ProjectFilter 
           categories={categories}
@@ -138,18 +172,23 @@ export const Projects = () => {
           {filteredProjects.map((project, index) => {
             const isHovered = hoveredProject === index;
             return (
-              <Card 
-                key={project.title}
-                className="glass-card overflow-hidden hover-glow group relative"
-                style={{
-                  animationDelay: `${index * 0.2}s`,
-                  transform: isHovered ? `translateY(-10px) rotateX(${mousePosition.y * 2}deg) rotateY(${mousePosition.x * 2}deg)` : 'translateY(0) rotateX(0deg) rotateY(0deg)',
-                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                  transformStyle: 'preserve-3d'
-                }}
-                onMouseEnter={() => setHoveredProject(index)}
-                onMouseLeave={() => setHoveredProject(null)}
-              >
+              <ScrollReveal key={project.title} direction="up" delay={index * 0.15}>
+                <MagneticElement strength={20}>
+                  <motion.div
+                    initial={{ y: 50, opacity: 0, scale: 0.9 }}
+                    animate={projectsVisible ? { y: 0, opacity: 1, scale: 1 } : { y: 50, opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.6, delay: index * 0.15 }}
+                    whileHover={{ y: -10, scale: 1.02 }}
+                  >
+                    <Card 
+                      className="glass-card overflow-hidden hover-glow group relative"
+                      style={{
+                        transform: isHovered ? `rotateX(${mousePosition.y * 2}deg) rotateY(${mousePosition.x * 2}deg)` : 'rotateX(0deg) rotateY(0deg)',
+                        transformStyle: 'preserve-3d'
+                      }}
+                      onMouseEnter={() => setHoveredProject(index)}
+                      onMouseLeave={() => setHoveredProject(null)}
+                    >
                 <div className="relative overflow-hidden">
                   <img
                     src={project.image}
@@ -246,17 +285,39 @@ export const Projects = () => {
                   </div>
                 </div>
               </Card>
+            </motion.div>
+          </MagneticElement>
+        </ScrollReveal>
             );
           })}
         </div>
 
-        <div className="text-center mt-12">
-          <Button variant="outline" size="lg" className="border-border bg-surface/50 backdrop-blur-sm hover:bg-surface/70">
-            View All Projects
-            <ExternalLink className="ml-2 h-5 w-5" />
-          </Button>
-        </div>
+        <ScrollReveal direction="up" delay={0.3}>
+          <motion.div 
+            className="text-center mt-12"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="border-border bg-surface/50 backdrop-blur-sm hover:bg-surface/70 relative overflow-hidden group"
+            >
+              <motion.span
+                className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-20"
+                initial={{ x: "-100%" }}
+                whileHover={{ x: "100%" }}
+                transition={{ duration: 0.6 }}
+              />
+              <span className="relative z-10 flex items-center">
+                View All Projects
+                <ExternalLink className="ml-2 h-5 w-5" />
+              </span>
+            </Button>
+          </motion.div>
+        </ScrollReveal>
       </div>
+      </ParallaxWrapper>
     </section>
   );
 };

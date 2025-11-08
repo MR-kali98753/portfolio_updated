@@ -6,6 +6,9 @@ import { Mail, Phone, MapPin, Send, Github, Linkedin, Twitter } from "lucide-rea
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { ScrollReveal, MagneticElement } from "@/components/MotionGraphics";
+import { ParallaxWrapper } from "@/components/ParallaxWrapper";
 
 export const Contact = () => {
   const { toast } = useToast();
@@ -113,11 +116,21 @@ export const Contact = () => {
     });
   };
 
+  const { scrollYProgress } = useScroll();
+  const backgroundRotate = useTransform(scrollYProgress, [0, 1], [0, 360]);
+  const backgroundOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.4, 0.6, 0.4]);
+
   return (
     <section id="contact" className="py-20 px-6 relative overflow-hidden">
-      {/* Interactive Background */}
-      <div className="absolute inset-0 opacity-40">
-        <div 
+      {/* Enhanced Interactive Background with Parallax */}
+      <motion.div 
+        className="absolute inset-0 opacity-40"
+        style={{ 
+          opacity: backgroundOpacity,
+          rotate: backgroundRotate,
+        }}
+      >
+        <motion.div 
           className="absolute inset-0"
           style={{
             background: `
@@ -128,60 +141,106 @@ export const Contact = () => {
                 hsl(var(--primary) / 0.05) 360deg
               )
             `,
-            transition: 'background 0.8s ease'
+          }}
+          animate={{
+            background: [
+              `conic-gradient(from ${mousePosition.x * 180}deg at 50% 50%, hsl(var(--primary) / 0.05) 0deg, hsl(var(--accent) / 0.05) 120deg, hsl(var(--secondary) / 0.05) 240deg, hsl(var(--primary) / 0.05) 360deg)`,
+              `conic-gradient(from ${mousePosition.x * 180 + 180}deg at 50% 50%, hsl(var(--accent) / 0.05) 0deg, hsl(var(--secondary) / 0.05) 120deg, hsl(var(--primary) / 0.05) 240deg, hsl(var(--accent) / 0.05) 360deg)`,
+              `conic-gradient(from ${mousePosition.x * 180}deg at 50% 50%, hsl(var(--primary) / 0.05) 0deg, hsl(var(--accent) / 0.05) 120deg, hsl(var(--secondary) / 0.05) 240deg, hsl(var(--primary) / 0.05) 360deg)`,
+            ],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "linear",
           }}
         />
         
-        {/* Animated network pattern */}
+        {/* Enhanced Animated network pattern */}
         <svg className="absolute inset-0 w-full h-full opacity-20">
           <defs>
             <pattern id="contact-grid" width="60" height="60" patternUnits="userSpaceOnUse">
-              <circle cx="30" cy="30" r="1" fill="hsl(var(--primary))" opacity="0.5">
-                <animate attributeName="r" values="1;2;1" dur="3s" repeatCount="indefinite" />
-              </circle>
+              <motion.circle 
+                cx="30" 
+                cy="30" 
+                r="1" 
+                fill="hsl(var(--primary))" 
+                opacity="0.5"
+                animate={{
+                  r: [1, 3, 1],
+                  opacity: [0.5, 0.8, 0.5],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#contact-grid)" />
-          {/* Animated connecting lines */}
+          {/* Enhanced Animated connecting lines */}
           <g opacity="0.3">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <line
+            {Array.from({ length: 8 }).map((_, i) => (
+              <motion.line
                 key={i}
-                x1={`${20 + i * 15}%`}
+                x1={`${20 + i * 10}%`}
                 y1="20%"
-                x2={`${30 + i * 15}%`}
+                x2={`${30 + i * 10}%`}
                 y2="80%"
                 stroke="hsl(var(--primary))"
                 strokeWidth="0.5"
-                className="animate-pulse"
-                style={{ animationDelay: `${i * 0.5}s` }}
+                animate={{
+                  opacity: [0.3, 0.6, 0.3],
+                  strokeWidth: [0.5, 1, 0.5],
+                }}
+                transition={{
+                  duration: 2,
+                  delay: i * 0.3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
               />
             ))}
           </g>
         </svg>
-      </div>
+      </motion.div>
       
-      <div className="max-w-7xl mx-auto relative z-10" ref={contactRef}>
-        <div className={`text-center mb-16 transition-all duration-1000 ${
-          contactVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-        }`}>
-          <h2 className="text-4xl md:text-6xl font-bold text-text-primary mb-6">
-            Get In <span className="gradient-text">Touch</span>
-          </h2>
-          <p className="text-xl text-text-secondary max-w-3xl mx-auto">
-            Ready to start your next project? Let's work together to create something amazing.
-          </p>
-        </div>
+      <ParallaxWrapper speed={0.3} direction="up">
+        <div className="max-w-7xl mx-auto relative z-10" ref={contactRef}>
+          <ScrollReveal direction="up" delay={0.1}>
+            <motion.div 
+              className={`text-center mb-16 transition-all duration-1000 ${
+                contactVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+              }`}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={contactVisible ? { scale: 1, opacity: 1 } : { scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <h2 className="text-4xl md:text-6xl font-bold text-text-primary mb-6">
+                Get In <span className="gradient-text">Touch</span>
+              </h2>
+              <p className="text-xl text-text-secondary max-w-3xl mx-auto">
+                Ready to start your next project? Let's work together to create something amazing.
+              </p>
+            </motion.div>
+          </ScrollReveal>
 
         <div className="grid lg:grid-cols-2 gap-12">
-          {/* Contact Form */}
-          <Card 
-            className="glass-card p-8 hover-glow relative overflow-hidden"
-            style={{
-              transform: `perspective(1000px) rotateX(${mousePosition.y * 1}deg) rotateY(${mousePosition.x * 1}deg)`,
-              transition: 'transform 0.3s ease'
-            }}
-          >
+          {/* Contact Form with enhanced animations */}
+          <ScrollReveal direction="left" delay={0.2}>
+            <MagneticElement strength={15}>
+              <motion.div
+                initial={{ x: -50, opacity: 0 }}
+                animate={contactVisible ? { x: 0, opacity: 1 } : { x: -50, opacity: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <Card 
+                  className="glass-card p-8 hover-glow relative overflow-hidden"
+                  style={{
+                    transform: `perspective(1000px) rotateX(${mousePosition.y * 1}deg) rotateY(${mousePosition.x * 1}deg)`,
+                  }}
+                >
             {/* Interactive form background */}
             <div 
               className="absolute inset-0 opacity-10 pointer-events-none"
@@ -274,67 +333,100 @@ export const Contact = () => {
               </Button>
             </form>
           </Card>
+            </motion.div>
+          </MagneticElement>
+        </ScrollReveal>
 
-          {/* Contact Info */}
-          <div className="space-y-8">
-            <div>
-              <h3 className="text-2xl font-semibold text-text-primary mb-6">
-                Let's connect
-              </h3>
-              <p className="text-text-secondary leading-relaxed mb-8">
-                I'm always open to discussing new opportunities, interesting projects, 
-                or just having a chat about technology and development. Feel free to reach out!
-              </p>
-            </div>
+          {/* Contact Info with enhanced animations */}
+          <ScrollReveal direction="right" delay={0.3}>
+            <div className="space-y-8">
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={contactVisible ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              >
+                <h3 className="text-2xl font-semibold text-text-primary mb-6">
+                  Let's connect
+                </h3>
+                <p className="text-text-secondary leading-relaxed mb-8">
+                  I'm always open to discussing new opportunities, interesting projects, 
+                  or just having a chat about technology and development. Feel free to reach out!
+                </p>
+              </motion.div>
 
-            <div className="space-y-4">
-              {contactInfo.map((info, index) => {
-                const Icon = info.icon;
-                return (
-                  <Card 
-                    key={info.title}
-                    className="glass-card p-4 hover-glow cursor-pointer group"
-                    onClick={() => handleContactClick(info.title, info.value)}
-                    style={{
-                      animationDelay: `${index * 0.1}s`
-                    }}
-                  >
-                    <div className="flex items-center space-x-4">
-                      <div className="p-3 rounded-full bg-gradient-primary group-hover:animate-pulse">
-                        <Icon className="h-5 w-5 text-primary-foreground" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-text-primary">{info.title}</h4>
-                        <p className="text-text-secondary group-hover:text-text-primary transition-colors">
-                          {info.value}
-                        </p>
-                      </div>
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
-
-            <div>
-              <h4 className="text-lg font-medium text-text-primary mb-4">Follow me</h4>
-              <div className="flex gap-4">
-                {socialLinks.map((social) => {
-                  const Icon = social.icon;
+              <div className="space-y-4">
+                {contactInfo.map((info, index) => {
+                  const Icon = info.icon;
                   return (
-                    <button
-                      key={social.name}
-                      onClick={() => handleSocialClick(social.name)}
-                      className={`p-3 rounded-full bg-surface-light/50 backdrop-blur-sm border border-border hover:bg-surface-light/70 transition-all duration-300 hover-glow ${social.color}`}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </button>
+                    <ScrollReveal key={info.title} direction="right" delay={0.4 + index * 0.1}>
+                      <MagneticElement strength={10}>
+                        <motion.div
+                          initial={{ x: 50, opacity: 0 }}
+                          animate={contactVisible ? { x: 0, opacity: 1 } : { x: 50, opacity: 0 }}
+                          transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
+                          whileHover={{ x: 10, scale: 1.02 }}
+                        >
+                          <Card 
+                            className="glass-card p-4 hover-glow cursor-pointer group"
+                            onClick={() => handleContactClick(info.title, info.value)}
+                          >
+                            <div className="flex items-center space-x-4">
+                              <motion.div 
+                                className="p-3 rounded-full bg-gradient-primary"
+                                whileHover={{ rotate: 360, scale: 1.1 }}
+                                transition={{ duration: 0.5 }}
+                              >
+                                <Icon className="h-5 w-5 text-primary-foreground" />
+                              </motion.div>
+                              <div>
+                                <h4 className="font-medium text-text-primary">{info.title}</h4>
+                                <p className="text-text-secondary group-hover:text-text-primary transition-colors">
+                                  {info.value}
+                                </p>
+                              </div>
+                            </div>
+                          </Card>
+                        </motion.div>
+                      </MagneticElement>
+                    </ScrollReveal>
                   );
                 })}
               </div>
+
+              <ScrollReveal direction="up" delay={0.7}>
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={contactVisible ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 }}
+                  transition={{ duration: 0.6, delay: 0.7 }}
+                >
+                  <h4 className="text-lg font-medium text-text-primary mb-4">Follow me</h4>
+                  <div className="flex gap-4">
+                    {socialLinks.map((social, index) => {
+                      const Icon = social.icon;
+                      return (
+                        <MagneticElement key={social.name} strength={15}>
+                          <motion.button
+                            onClick={() => handleSocialClick(social.name)}
+                            className={`p-3 rounded-full bg-surface-light/50 backdrop-blur-sm border border-border hover:bg-surface-light/70 transition-all duration-300 hover-glow ${social.color}`}
+                            whileHover={{ scale: 1.1, rotate: 360 }}
+                            whileTap={{ scale: 0.9 }}
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={contactVisible ? { scale: 1, rotate: 0 } : { scale: 0, rotate: -180 }}
+                            transition={{ duration: 0.5, delay: 0.8 + index * 0.1, type: "spring" }}
+                          >
+                            <Icon className="h-5 w-5" />
+                          </motion.button>
+                        </MagneticElement>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              </ScrollReveal>
             </div>
-          </div>
+          </ScrollReveal>
         </div>
       </div>
+      </ParallaxWrapper>
     </section>
   );
 };
