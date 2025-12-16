@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { motion, useTransform, useScroll } from "framer-motion";
 import { VideoBackground } from "@/components/VideoBackground";
 import { ParticleField, AnimatedText, MagneticButton } from "@/components/AnimeStyleEffects";
-import heroVideo from "@/assets/hero-video.mp4";
 
 export const Hero = () => {
   const roles = [
@@ -59,7 +58,7 @@ export const Hero = () => {
     >
       {/* Video Background at z-2 */}
       <VideoBackground
-        videoSrc={heroVideo}
+        videoSrc="/hero-video.mp4"
         overlay={true}
         overlayOpacity={0.5}
       />

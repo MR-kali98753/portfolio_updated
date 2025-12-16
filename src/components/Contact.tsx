@@ -84,16 +84,30 @@ export const Contact = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate form submission
-    setTimeout(() => {
-      toast({
-        title: "Message Sent!",
-        description: "Thank you for your message. I'll get back to you soon!",
-      });
-      
-      setFormData({ name: "", email: "", subject: "", message: "" });
-      setIsSubmitting(false);
-    }, 2000);
+    // Format message for WhatsApp
+    const whatsappMessage = `*New Contact Form Message*\n\n` +
+      `*Name:* ${formData.name}\n` +
+      `*Email:* ${formData.email}\n` +
+      `*Subject:* ${formData.subject}\n\n` +
+      `*Message:*\n${formData.message}`;
+    
+    // Encode message for URL
+    const encodedMessage = encodeURIComponent(whatsappMessage);
+    
+    // WhatsApp number: +919938887489 (remove + and spaces)
+    const whatsappNumber = "919938887489";
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+    
+    // Open WhatsApp with the message
+    window.open(whatsappUrl, '_blank');
+    
+    toast({
+      title: "Opening WhatsApp!",
+      description: "Your message is ready to send on WhatsApp.",
+    });
+    
+    setFormData({ name: "", email: "", subject: "", message: "" });
+    setIsSubmitting(false);
   };
 
   const handleSocialClick = (platform: string) => {
