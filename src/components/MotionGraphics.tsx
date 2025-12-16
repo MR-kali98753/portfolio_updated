@@ -1,5 +1,6 @@
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { usePerformanceMonitor } from "@/hooks/usePerformanceMonitor";
 
 interface ParticleProps {
   x: number;
@@ -193,10 +194,21 @@ export const MotionGraphics = ({
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
+  const { getOptimizedParticleCount, shouldReduceMotion } = usePerformanceMonitor();
 
   const springConfig = { damping: 50, stiffness: 100 };
   const x = useSpring(mouseX, springConfig);
   const y = useSpring(mouseY, springConfig);
+  
+  // Optimize counts based on performance
+  const optimizedParticleCount = getOptimizedParticleCount(particleCount);
+  const optimizedShapeCount = getOptimizedParticleCount(shapeCount);
+  
+  // Reduce animation complexity on low performance
+  const reducedMotion = shouldReduceMotion();
+  
+  // Disable heavy animations entirely on very low performance
+  const disableHeavyAnimations = reducedMotion && intensity === "high";
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -211,49 +223,63 @@ export const MotionGraphics = ({
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [mouseX, mouseY]);
 
-  const particleSize = intensity === "high" ? 6 : intensity === "medium" ? 4 : 2;
+  const baseParticleSize = intensity === "high" ? 6 : intensity === "medium" ? 4 : 2;
+  const particleSize = reducedMotion ? baseParticleSize * 0.7 : baseParticleSize;
   const actualParticleCount = intensity === "high" ? particleCount * 1.5 : intensity === "low" ? particleCount * 0.5 : particleCount;
+  const optimizedActualParticleCount = getOptimizedParticleCount(actualParticleCount);
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {/* Animated Particles */}
-      <div className="absolute inset-0">
-        {Array.from({ length: Math.floor(actualParticleCount) }).map((_, i) => (
-          <Particle
-            key={`particle-${i}`}
-            x={Math.random() * 100}
-            y={Math.random() * 100}
-            delay={Math.random() * 2}
-            duration={3 + Math.random() * 2}
-            size={particleSize + Math.random() * particleSize}
-          />
-        ))}
-      </div>
+      {!disableHeavyAnimations && (
+        <div className="absolute inset-0">
+          {Array.from({ length: Math.floor(optimizedActualParticleCount) }).map((_, i) => (
+            // Skip some particles on low performance
+            (!reducedMotion || i % 3 !== 0) && (
+              <Particle
+                key={`particle-${i}`}
+                x={Math.random() * 100}
+                y={Math.random() * 100}
+                delay={Math.random() * 2}
+                duration={reducedMotion ? 2 : 3 + Math.random() * 2}
+                size={particleSize + Math.random() * particleSize}
+              />
+            )
+          ))}
+        </div>
+      )}
 
       {/* Floating Shapes */}
-      <div className="absolute inset-0">
-        {Array.from({ length: shapeCount }).map((_, i) => (
-          <FloatingShape
-            key={`shape-${i}`}
-            x={Math.random() * 100}
-            y={Math.random() * 100}
-            delay={Math.random() * 2}
-            size={20 + Math.random() * 40}
-            shape={["circle", "square", "triangle"][i % 3] as "circle" | "square" | "triangle"}
-            color={`linear-gradient(45deg, hsl(var(--primary)), hsl(var(--accent)))`}
-          />
-        ))}
-      </div>
+      {!disableHeavyAnimations && (
+        <div className="absolute inset-0">
+          {Array.from({ length: Math.floor(optimizedShapeCount) }).map((_, i) => (
+            // Skip some shapes on low performance
+            (!reducedMotion || i % 2 === 0) && (
+              <FloatingShape
+                key={`shape-${i}`}
+                x={Math.random() * 100}
+                y={Math.random() * 100}
+                delay={Math.random() * 2}
+                size={reducedMotion ? 20 + Math.random() * 20 : 20 + Math.random() * 40}
+                shape={["circle", "square", "triangle"][i % 3] as "circle" | "square" | "triangle"}
+                color={`linear-gradient(45deg, hsl(var(--primary)), hsl(var(--accent)))`}
+              />
+            )
+          ))}
+        </div>
+      )}
 
       {/* Interactive Light Beam */}
-      <motion.div
-        className="absolute inset-0 opacity-10"
-        style={{
-          background: `radial-gradient(circle at ${50 + mousePosition.x * 20}% ${50 + mousePosition.y * 20}%, hsl(var(--primary)), transparent 60%)`,
-          x,
-          y,
-        }}
-      />
+      {!reducedMotion && (
+        <motion.div
+          className="absolute inset-0 opacity-10"
+          style={{
+            background: `radial-gradient(circle at ${50 + mousePosition.x * 20}% ${50 + mousePosition.y * 20}%, hsl(var(--primary)), transparent 60%)`,
+            x,
+            y,
+          }}
+        />
+      )}
 
       {/* Animated Wave Lines */}
       <svg className="absolute inset-0 w-full h-full opacity-10">
@@ -264,32 +290,32 @@ export const MotionGraphics = ({
             <stop offset="100%" stopColor="hsl(var(--secondary))" stopOpacity="0.4" />
           </linearGradient>
         </defs>
-        {Array.from({ length: 3 }).map((_, i) => (
+        {Array.from({ length: reducedMotion ? 2 : 3 }).map((_, i) => (
           <motion.path
             key={`wave-${i}`}
             d={`M0,${200 + i * 150} Q${400 + mousePosition.x * 100},${100 + i * 50} 800,${300 + i * 100} T1600,${200 + i * 150}`}
             stroke="url(#waveGradient)"
             strokeWidth="2"
             fill="none"
-            animate={{
+            animate={!reducedMotion ? {
               d: [
                 `M0,${200 + i * 150} Q400,${100 + i * 50} 800,${300 + i * 100} T1600,${200 + i * 150}`,
                 `M0,${220 + i * 150} Q450,${120 + i * 50} 850,${320 + i * 100} T1600,${220 + i * 150}`,
                 `M0,${200 + i * 150} Q400,${100 + i * 50} 800,${300 + i * 100} T1600,${200 + i * 150}`,
-              ],
-            }}
-            transition={{
+              ]
+            } : undefined}
+            transition={!reducedMotion ? {
               duration: 4 + i,
               repeat: Infinity,
               ease: "easeInOut",
-            }}
+            } : undefined}
           />
         ))}
       </svg>
 
       {/* Rotating Rings */}
       <div className="absolute inset-0 flex items-center justify-center">
-        {Array.from({ length: 3 }).map((_, i) => (
+        {Array.from({ length: reducedMotion ? 2 : 3 }).map((_, i) => (
           <motion.div
             key={`ring-${i}`}
             className="absolute rounded-full border-2 border-primary/20"
@@ -297,15 +323,22 @@ export const MotionGraphics = ({
               width: 200 + i * 100,
               height: 200 + i * 100,
             }}
-            animate={{
+            animate={!reducedMotion ? {
               rotate: 360,
               scale: [1, 1.1, 1],
               opacity: [0.2, 0.4, 0.2],
+            } : {
+              scale: [1, 1.05, 1],
+              opacity: [0.2, 0.3, 0.2],
             }}
-            transition={{
+            transition={!reducedMotion ? {
               duration: 20 + i * 5,
               repeat: Infinity,
               ease: "linear",
+            } : {
+              duration: 30 + i * 5,
+              repeat: Infinity,
+              ease: "easeInOut",
             }}
           />
         ))}

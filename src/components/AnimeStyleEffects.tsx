@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { usePerformanceMonitor } from "@/hooks/usePerformanceMonitor";
 
 // Cursor Trail Effect
 interface CursorTrailProps {
@@ -11,8 +12,17 @@ export const CursorTrail = ({ particles = 20, colors }: CursorTrailProps) => {
   const [trail, setTrail] = useState<Array<{ x: number; y: number; id: number }>>([]);
   const mousePos = useRef({ x: 0, y: 0 });
   const trailId = useRef(0);
+  const { getOptimizedParticleCount, shouldReduceMotion } = usePerformanceMonitor();
+  
+  // Optimize particle count based on performance
+  const optimizedParticleCount = getOptimizedParticleCount(particles);
+  
+  // Disable cursor trail entirely on low performance
+  const disableTrail = shouldReduceMotion();
 
   useEffect(() => {
+    if (disableTrail) return;
+    
     const updateMousePosition = (e: MouseEvent) => {
       mousePos.current = { x: e.clientX, y: e.clientY };
       
@@ -23,13 +33,13 @@ export const CursorTrail = ({ particles = 20, colors }: CursorTrailProps) => {
           { x: e.clientX, y: e.clientY, id: trailId.current++ },
         ];
         // Keep only last N particles
-        return newTrail.slice(-particles);
+        return newTrail.slice(-optimizedParticleCount);
       });
     };
 
     window.addEventListener("mousemove", updateMousePosition);
     return () => window.removeEventListener("mousemove", updateMousePosition);
-  }, [particles]);
+  }, [optimizedParticleCount, disableTrail]);
 
   const defaultColors = [
     "hsl(var(--primary))",
@@ -92,21 +102,30 @@ export const ParticleField = ({
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number>();
+  const { getOptimizedParticleCount, shouldReduceMotion } = usePerformanceMonitor();
+  
+  // Optimize particle count based on performance
+  const optimizedParticleCount = getOptimizedParticleCount(count);
+  
+  // Reduce animation complexity on low performance
+  const reducedMotion = shouldReduceMotion();
+  const optimizedSpeed = reducedMotion ? speed * 0.5 : speed;
+  const optimizedInteractive = reducedMotion ? false : interactive;
 
   useEffect(() => {
     // Initialize particles
-    const initialParticles = Array.from({ length: count }).map(() => ({
+    const initialParticles = Array.from({ length: optimizedParticleCount }).map(() => ({
       x: Math.random() * (containerRef.current?.clientWidth || window.innerWidth),
       y: Math.random() * (containerRef.current?.clientHeight || window.innerHeight),
-      vx: (Math.random() - 0.5) * speed,
-      vy: (Math.random() - 0.5) * speed,
+      vx: (Math.random() - 0.5) * optimizedSpeed,
+      vy: (Math.random() - 0.5) * optimizedSpeed,
       size: Math.random() * 3 + 1,
     }));
     setParticles(initialParticles);
-  }, [count, speed]);
+  }, [optimizedParticleCount, optimizedSpeed]);
 
   useEffect(() => {
-    if (!interactive) return;
+    if (!optimizedInteractive) return;
 
     const handleMouseMove = (e: MouseEvent) => {
       setMousePos({ x: e.clientX, y: e.clientY });
@@ -114,10 +133,22 @@ export const ParticleField = ({
 
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [interactive]);
+  }, [optimizedInteractive]);
 
   useEffect(() => {
-    const animate = () => {
+    let lastUpdateTime = 0;
+    const frameThrottle = reducedMotion ? 3 : 1; // Skip frames on low performance
+    let frameCount = 0;
+    
+    const animate = (timestamp: number) => {
+      frameCount++;
+      
+      // Throttle animation updates on low performance
+      if (frameCount % frameThrottle !== 0) {
+        animationFrameRef.current = requestAnimationFrame(animate);
+        return;
+      }
+      
       setParticles((prev) =>
         prev.map((particle) => {
           let { x, y, vx, vy } = particle;
@@ -128,8 +159,8 @@ export const ParticleField = ({
           x += vx;
           y += vy;
 
-          // Mouse interaction
-          if (interactive) {
+          // Mouse interaction (skip on low performance)
+          if (optimizedInteractive && !reducedMotion) {
             const dx = mousePos.x - x;
             const dy = mousePos.y - y;
             const distance = Math.sqrt(dx * dx + dy * dy);
@@ -151,8 +182,8 @@ export const ParticleField = ({
           y = Math.max(0, Math.min(height, y));
 
           // Apply damping
-          vx *= 0.98;
-          vy *= 0.98;
+          vx *= reducedMotion ? 0.99 : 0.98; // Faster damping on low performance
+          vy *= reducedMotion ? 0.99 : 0.98;
 
           return { ...particle, x, y, vx, vy };
         })
@@ -167,7 +198,7 @@ export const ParticleField = ({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [mousePos, interactive]);
+  }, [mousePos, optimizedInteractive, reducedMotion]);
 
   return (
     <div
@@ -176,28 +207,33 @@ export const ParticleField = ({
       style={{ zIndex: 1 }}
     >
       {particles.map((particle, index) => (
-        <motion.div
-          key={index}
-          className="absolute rounded-full"
-          style={{
-            left: particle.x,
-            top: particle.y,
-            width: particle.size,
-            height: particle.size,
-            backgroundColor: `hsl(var(--primary) / 0.6)`,
-            transform: "translate(-50%, -50%)",
-            boxShadow: `0 0 ${particle.size * 2}px hsl(var(--primary) / 0.8)`,
-          }}
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.4, 0.8, 0.4],
-          }}
-          transition={{
-            duration: 2 + Math.random() * 2,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
+        // Skip rendering some particles on low performance
+        (!reducedMotion || index % 2 === 0) && (
+          <motion.div
+            key={index}
+            className="absolute rounded-full"
+            style={{
+              left: particle.x,
+              top: particle.y,
+              width: particle.size,
+              height: particle.size,
+              backgroundColor: `hsl(var(--primary) / ${reducedMotion ? 0.4 : 0.6})`,
+              transform: "translate(-50%, -50%)",
+              boxShadow: reducedMotion 
+                ? `0 0 ${particle.size}px hsl(var(--primary) / 0.4)` 
+                : `0 0 ${particle.size * 2}px hsl(var(--primary) / 0.8)` ,
+            }}
+            animate={reducedMotion ? undefined : {
+              scale: [1, 1.2, 1],
+              opacity: [0.4, 0.8, 0.4],
+            }}
+            transition={reducedMotion ? undefined : {
+              duration: 2 + Math.random() * 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        )
       ))}
     </div>
   );

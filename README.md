@@ -64,6 +64,10 @@ This project is built with:
 
 Simply open [Lovable](https://lovable.dev/projects/cfcd8c2e-9613-4c6e-bc50-16ecb97a5e7a) and click on Share -> Publish.
 
+## Download Files Setup
+
+If you want the CV and APK download buttons to work, you need to add your actual files to the `public/assets/` directory. See `DOWNLOAD_SETUP.md` for detailed instructions.
+
 ## Can I connect a custom domain to my Lovable project?
 
 Yes, you can!

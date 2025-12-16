@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Loading from "./components/loading";
 import { PageTransition } from "./components/PageTransition";
+import { PerformanceTest } from "./components/PerformanceTest";
 import { useState, useEffect } from 'react';
 
 const queryClient = new QueryClient();
@@ -71,6 +72,7 @@ const App = () => {
               <BrowserRouter>
                 <AnimatedRoutes />
               </BrowserRouter>
+              {import.meta.env.DEV && <PerformanceTest />}
             </motion.div>
           )}
         </AnimatePresence>

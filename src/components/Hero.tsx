@@ -42,14 +42,42 @@ export const Hero = () => {
     const link = document.createElement("a");
     link.href = "/assets/Abinas_Keshari_Singh_ATS_OnePage.docx"; // ✅ should be in public/assets
     link.download = "Abinas_Keshari_Singh_ATS_OnePage.docx";
-    link.click();
+    
+    // Check if file exists before downloading
+    fetch(link.href)
+      .then(response => {
+        if (response.ok) {
+          link.click();
+        } else {
+          // Fallback to a generic message if file doesn't exist
+          alert("CV file is not available for download at the moment. Please contact me directly at abinaskesharisingh@outlook.com");
+        }
+      })
+      .catch(() => {
+        // Handle network errors
+        alert("Unable to download CV at the moment. Please contact me directly at abinaskesharisingh@outlook.com");
+      });
   };
 
   const downloadApp = () => {
     const link = document.createElement("a");
     link.href = "/assets/application-f5c02e22-2deb-45d1-894f-065a2303dcab.apk";
     link.download = "AbinasKeshariSingh.apk";
-    link.click();
+    
+    // Check if file exists before downloading
+    fetch(link.href)
+      .then(response => {
+        if (response.ok) {
+          link.click();
+        } else {
+          // Fallback to a generic message if file doesn't exist
+          alert("App file is not available for download at the moment. Please contact me directly at abinaskesharisingh@outlook.com");
+        }
+      })
+      .catch(() => {
+        // Handle network errors
+        alert("Unable to download app at the moment. Please contact me directly at abinaskesharisingh@outlook.com");
+      });
   };
 
   return (
@@ -301,12 +329,7 @@ export const Hero = () => {
               variant="outline"
               size="lg"
               className="border-border bg-card/50 backdrop-blur-sm hover:bg-card/70 px-8 py-4 text-lg"
-              onClick={() => {
-                const link = document.createElement("a");
-                link.href = "/assets/application-f5c02e22-2deb-45d1-894f-065a2303dcab.apk";
-                link.download = "AbinasKeshariSingh.apk";
-                link.click();
-              }}
+              onClick={downloadApp}
             >
               Download App
               <Download className="ml-2 h-5 w-5" />

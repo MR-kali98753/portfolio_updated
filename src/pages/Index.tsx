@@ -10,13 +10,22 @@ import { CursorTrail } from "@/components/AnimeStyleEffects";
 import { ScrollMorphOverlay } from "@/components/ScrollMorphOverlay";
 import { motion } from "framer-motion";
 
+// Check environment variables for performance settings
+const enableCursorTrail = import.meta.env.VITE_APP_ENABLE_CURSOR_TRAIL !== 'false';
+const enableMotionGraphics = import.meta.env.VITE_APP_ENABLE_MOTION_GRAPHICS !== 'false';
+const motionGraphicsIntensity = import.meta.env.VITE_APP_ANIMATION_QUALITY === 'low' ? 'low' : 
+                              import.meta.env.VITE_APP_ANIMATION_QUALITY === 'high' ? 'high' : 'medium';
+const particleCount = parseInt(import.meta.env.VITE_APP_PARTICLE_COUNT || '25');
+
 const Index = () => {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       <Navigation />
       
       {/* AnimeJS Style Cursor Trail */}
-      <CursorTrail particles={15} />
+      {enableCursorTrail && (
+        <CursorTrail particles={15} />
+      )}
       
       {/* Scroll Morphing Overlay - Changes form based on scroll progress */}
       <ScrollMorphOverlay 
@@ -27,9 +36,11 @@ const Index = () => {
       />
       
       {/* Global Motion Graphics Background */}
-      <div className="fixed inset-0 -z-10">
-        <MotionGraphics particleCount={25} shapeCount={6} intensity="medium" />
-      </div>
+      {enableMotionGraphics && (
+        <div className="fixed inset-0 -z-10">
+          <MotionGraphics particleCount={particleCount} shapeCount={6} intensity={motionGraphicsIntensity} />
+        </div>
+      )}
       
       <main>
         {/* Hero Section with Parallax */}
