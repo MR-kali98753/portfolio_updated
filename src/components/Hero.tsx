@@ -39,27 +39,71 @@ export const Hero = () => {
   };
 
   const downloadCV = () => {
+    // First, try to download the local file
+    const localFilePath = "/assets/Abinas_Keshari_Singh_ATS_OnePage.docx";
+    
+    fetch(localFilePath)
+      .then(response => {
+        if (response.ok) {
+          // File exists, download it directly
+          const link = document.createElement("a");
+          link.href = localFilePath;
+          link.download = "Abinas_Keshari_Singh_ATS_OnePage.docx";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } else {
+          // File doesn't exist, offer alternatives
+          showCVDownloadOptions();
+        }
+      })
+      .catch(() => {
+        // Network error, offer alternatives
+        showCVDownloadOptions();
+      });
+  };
+  
+  const showCVDownloadOptions = () => {
     const googleDriveLink = "https://drive.google.com/file/d/1cv-link-placeholder/view?usp=sharing";
     
-    // Show options to user
     if (confirm("The CV file is hosted on Google Drive. Would you like to:\n\n1. Download directly from Google Drive\n2. Receive it via email\n\nClick OK to open Google Drive, or Cancel to request via email.")) {
-      // Open Google Drive link
       window.open(googleDriveLink, '_blank');
     } else {
-      // Send email request
       window.location.href = "mailto:abinaskesharisingh@outlook.com?subject=Request for CV&body=Hi Abinas,\n\nI would like to request a copy of your CV.\n\nBest regards,";
     }
   };
 
   const downloadApp = () => {
+    // First, try to download the local file
+    const localFilePath = "/assets/application-f5c02e22-2deb-45d1-894f-065a2303dcab.apk";
+    
+    fetch(localFilePath)
+      .then(response => {
+        if (response.ok) {
+          // File exists, download it directly
+          const link = document.createElement("a");
+          link.href = localFilePath;
+          link.download = "AbinasKeshariSingh.apk";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } else {
+          // File doesn't exist, offer alternatives
+          showAPKDownloadOptions();
+        }
+      })
+      .catch(() => {
+        // Network error, offer alternatives
+        showAPKDownloadOptions();
+      });
+  };
+  
+  const showAPKDownloadOptions = () => {
     const googleDriveLink = "https://drive.google.com/file/d/1apk-link-placeholder/view?usp=sharing";
     
-    // Show options to user
     if (confirm("The APK file is hosted on Google Drive. Would you like to:\n\n1. Download directly from Google Drive\n2. Receive it via email\n\nClick OK to open Google Drive, or Cancel to request via email.")) {
-      // Open Google Drive link
       window.open(googleDriveLink, '_blank');
     } else {
-      // Send email request
       window.location.href = "mailto:abinaskesharisingh@outlook.com?subject=Request for APK&body=Hi Abinas,\n\nI would like to request a copy of your mobile application.\n\nBest regards,";
     }
   };
