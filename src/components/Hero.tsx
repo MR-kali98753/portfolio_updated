@@ -39,45 +39,29 @@ export const Hero = () => {
   };
 
   const downloadCV = () => {
-    const link = document.createElement("a");
-    link.href = "/assets/Abinas_Keshari_Singh_ATS_OnePage.docx"; // ✅ should be in public/assets
-    link.download = "Abinas_Keshari_Singh_ATS_OnePage.docx";
+    const googleDriveLink = "https://drive.google.com/file/d/1cv-link-placeholder/view?usp=sharing";
     
-    // Check if file exists before downloading
-    fetch(link.href)
-      .then(response => {
-        if (response.ok) {
-          link.click();
-        } else {
-          // Fallback to a generic message if file doesn't exist
-          alert("CV file is not available for download at the moment. Please contact me directly at abinaskesharisingh@outlook.com");
-        }
-      })
-      .catch(() => {
-        // Handle network errors
-        alert("Unable to download CV at the moment. Please contact me directly at abinaskesharisingh@outlook.com");
-      });
+    // Show options to user
+    if (confirm("The CV file is hosted on Google Drive. Would you like to:\n\n1. Download directly from Google Drive\n2. Receive it via email\n\nClick OK to open Google Drive, or Cancel to request via email.")) {
+      // Open Google Drive link
+      window.open(googleDriveLink, '_blank');
+    } else {
+      // Send email request
+      window.location.href = "mailto:abinaskesharisingh@outlook.com?subject=Request for CV&body=Hi Abinas,\n\nI would like to request a copy of your CV.\n\nBest regards,";
+    }
   };
 
   const downloadApp = () => {
-    const link = document.createElement("a");
-    link.href = "/assets/application-f5c02e22-2deb-45d1-894f-065a2303dcab.apk";
-    link.download = "AbinasKeshariSingh.apk";
+    const googleDriveLink = "https://drive.google.com/file/d/1apk-link-placeholder/view?usp=sharing";
     
-    // Check if file exists before downloading
-    fetch(link.href)
-      .then(response => {
-        if (response.ok) {
-          link.click();
-        } else {
-          // Fallback to a generic message if file doesn't exist
-          alert("App file is not available for download at the moment. Please contact me directly at abinaskesharisingh@outlook.com");
-        }
-      })
-      .catch(() => {
-        // Handle network errors
-        alert("Unable to download app at the moment. Please contact me directly at abinaskesharisingh@outlook.com");
-      });
+    // Show options to user
+    if (confirm("The APK file is hosted on Google Drive. Would you like to:\n\n1. Download directly from Google Drive\n2. Receive it via email\n\nClick OK to open Google Drive, or Cancel to request via email.")) {
+      // Open Google Drive link
+      window.open(googleDriveLink, '_blank');
+    } else {
+      // Send email request
+      window.location.href = "mailto:abinaskesharisingh@outlook.com?subject=Request for APK&body=Hi Abinas,\n\nI would like to request a copy of your mobile application.\n\nBest regards,";
+    }
   };
 
   return (

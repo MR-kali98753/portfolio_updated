@@ -3,6 +3,10 @@
     {
       "source": "/assets/:path*",
       "destination": "/assets/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [

@@ -30,6 +30,42 @@ export const Projects = () => {
 
   const projects = [
     {
+      title: "SaaS Application",
+      description: "A comprehensive Software-as-a-Service platform built with React Native Expo, featuring subscription management, user dashboards, and analytics.",
+      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80",
+      technologies: ["React Native", "Expo", "Firebase", "Stripe", "Redux"],
+      category: "Mobile",
+      liveUrl: "#",
+      githubUrl: "#"
+    },
+    {
+      title: "AR Jewelry App",
+      description: "Augmented Reality application for trying on jewelry virtually. Uses ARKit/ARCore for realistic 3D rendering and placement.",
+      image: "https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=800&q=80",
+      technologies: ["React Native", "Expo", "ARKit", "Three.js", "Blender"],
+      category: "Mobile",
+      liveUrl: "#",
+      githubUrl: "#"
+    },
+    {
+      title: "AI Voice Calling App",
+      description: "Intelligent voice calling application with AI-powered transcription, translation, and voice cloning capabilities.",
+      image: "https://images.unsplash.com/photo-1551817958-d9d86fb29431?auto=format&fit=crop&w=800&q=80",
+      technologies: ["React Native", "Expo", "WebRTC", "TensorFlow.js", "Node.js"],
+      category: "Mobile",
+      liveUrl: "#",
+      githubUrl: "#"
+    },
+    {
+      title: "Namaste Rides (Ongoing)",
+      description: "Ride-sharing platform currently in development. Features real-time tracking, payment integration, and driver/passenger matching.",
+      image: "https://images.unsplash.com/photo-1593062091239-7d55d12b43fd?auto=format&fit=crop&w=800&q=80",
+      technologies: ["React Native", "Expo", "Socket.IO", "Google Maps", "MongoDB"],
+      category: "Mobile",
+      liveUrl: "#",
+      githubUrl: "#"
+    },
+    {
       title: "E-Commerce Platform",
       description: "A full-stack e-commerce solution with React, Node.js, and Stripe integration. Features include product management, cart functionality, and secure payments.",
       image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=800&q=80",
@@ -67,13 +103,35 @@ export const Projects = () => {
     }
   ];
 
-  const categories = ["All", ...Array.from(new Set(projects.map(p => p.category)))];
+  const categories = ["All", "Mobile", "Full Stack", "Frontend"];
   
   const filteredProjects = activeCategory === "All" 
     ? projects 
     : projects.filter(project => project.category === activeCategory);
 
   const handleProjectAction = (action: string, projectTitle: string) => {
+    // Special handling for mobile projects
+    if (action === "Live Demo" && projectTitle.includes("(Ongoing)")) {
+      toast({
+        title: `Project In Development`,
+        description: `${projectTitle} is currently in development and not yet available for demo.`,
+      });
+      return;
+    }
+    
+    // Special handling for placeholder URLs
+    if ((action === "Live Demo" || action === "Source Code") && 
+        (projectTitle.includes("SaaS Application") || 
+         projectTitle.includes("AR Jewelry App") || 
+         projectTitle.includes("AI Voice Calling App") || 
+         projectTitle.includes("Namaste Rides"))) {
+      toast({
+        title: `${action} Unavailable`,
+        description: `Demo and source code for ${projectTitle} will be available soon. Contact me for more information.`,
+      });
+      return;
+    }
+    
     toast({
       title: `${action} ${projectTitle}`,
       description: `Opening ${action.toLowerCase()} for ${projectTitle}...`,
@@ -159,6 +217,14 @@ export const Projects = () => {
               <p className="text-xl text-text-secondary max-w-3xl mx-auto">
                 A showcase of my recent work and personal projects
               </p>
+              {activeCategory === "Mobile" && (
+                <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg max-w-2xl mx-auto">
+                  <p className="text-blue-300 flex items-center justify-center gap-2">
+                    <span className="inline-block w-3 h-3 bg-blue-500 rounded-full animate-pulse"></span>
+                    Featured React Native Expo Applications
+                  </p>
+                </div>
+              )}
             </motion.div>
           </ScrollReveal>
 
@@ -181,7 +247,7 @@ export const Projects = () => {
                     whileHover={{ y: -10, scale: 1.02 }}
                   >
                     <Card 
-                      className="glass-card overflow-hidden hover-glow group relative"
+                      className={`glass-card overflow-hidden hover-glow group relative ${project.category === "Mobile" ? 'border-l-4 border-blue-500' : ''}`}
                       style={{
                         transform: isHovered ? `rotateX(${mousePosition.y * 2}deg) rotateY(${mousePosition.x * 2}deg)` : 'rotateX(0deg) rotateY(0deg)',
                         transformStyle: 'preserve-3d'
@@ -212,6 +278,17 @@ export const Projects = () => {
                       background: `radial-gradient(circle at ${50 + mousePosition.x * 30}% ${50 + mousePosition.y * 30}%, hsl(var(--primary) / 0.3), transparent 60%)`
                     }}
                   />
+                  
+                  {/* Mobile project indicator */}
+                  {project.category === "Mobile" && (
+                    <div className="absolute top-2 left-2">
+                      <div className="flex items-center gap-1 bg-blue-500/20 px-2 py-1 rounded-full border border-blue-500/30">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                        <span className="text-xs text-blue-300 font-medium">Expo</span>
+                      </div>
+                    </div>
+                  )}
+                  
                   <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <Button 
                       size="sm" 
@@ -220,6 +297,10 @@ export const Projects = () => {
                       onClick={(e) => {
                         e.stopPropagation();
                         handleProjectAction("Preview", project.title);
+                        // Only open URL if it's not a placeholder
+                        if (project.liveUrl !== "#") {
+                          window.open(project.liveUrl, '_blank');
+                        }
                       }}
                     >
                       <Eye className="h-4 w-4" />
@@ -231,6 +312,10 @@ export const Projects = () => {
                       onClick={(e) => {
                         e.stopPropagation();
                         handleProjectAction("GitHub", project.title);
+                        // Only open URL if it's not a placeholder
+                        if (project.githubUrl !== "#") {
+                          window.open(project.githubUrl, '_blank');
+                        }
                       }}
                     >
                       <Github className="h-4 w-4" />
@@ -239,9 +324,16 @@ export const Projects = () => {
                 </div>
                 
                 <div className="p-6 space-y-4">
-                  <h3 className="text-xl font-semibold text-text-primary group-hover:gradient-text transition-all duration-300">
-                    {project.title}
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xl font-semibold text-text-primary group-hover:gradient-text transition-all duration-300">
+                      {project.title}
+                    </h3>
+                    {project.category === "Mobile" && (
+                      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                        Mobile
+                      </span>
+                    )}
+                  </div>
                   
                   <p className="text-text-secondary leading-relaxed">
                     {project.description}
@@ -264,7 +356,10 @@ export const Projects = () => {
                       className="bg-gradient-primary hover:opacity-90 text-primary-foreground border-0 flex-1"
                       onClick={() => {
                         handleProjectAction("Live Demo", project.title);
-                        window.open(project.liveUrl, '_blank');
+                        // Only open URL if it's not a placeholder
+                        if (project.liveUrl !== "#") {
+                          window.open(project.liveUrl, '_blank');
+                        }
                       }}
                     >
                       <ExternalLink className="mr-2 h-4 w-4" />
@@ -276,7 +371,10 @@ export const Projects = () => {
                       className="border-border bg-surface/50 backdrop-blur-sm hover:bg-surface/70"
                       onClick={() => {
                         handleProjectAction("Source Code", project.title);
-                        window.open(project.githubUrl, '_blank');
+                        // Only open URL if it's not a placeholder
+                        if (project.githubUrl !== "#") {
+                          window.open(project.githubUrl, '_blank');
+                        }
                       }}
                     >
                       <Github className="mr-2 h-4 w-4" />
